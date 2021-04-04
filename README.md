@@ -13,7 +13,7 @@ Steps taken:
     * `statevector_simulator` to view single measurement of qubit
         * plot measurement to represent state on bloch sphere
 
-`Qiskit version:`
+Qiskit version:
 
 ```python
 {
