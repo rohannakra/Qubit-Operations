@@ -7,7 +7,7 @@ Steps taken:
 * create qubit
     * through `QuantumCircuit()`
     * put in superposition
-    * measured
+    * measure
 * simulations
     * `qasm_simulator` to view measures through `shots` amount of iters
     * `statevector_simulator` to view single measurement of qubit
