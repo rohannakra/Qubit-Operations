@@ -16,16 +16,3 @@ Steps taken:
 Result:
 
 <img src='bloch_sphere.png'>
-
-```shell
->>> qiskit.__qiskit_version__
-
-{
-    'qiskit-terra': '0.16.4', 
-    'qiskit-aer': '0.7.6', 
-    'qiskit-ignis': '0.5.2', 
-    'qiskit-ibmq-provider': '0.12.1', 
-    'qiskit-aqua': '0.8.2', 
-    'qiskit': '0.24.0'
-}
-```
