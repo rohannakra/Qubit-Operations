@@ -1,8 +1,5 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
-# %%
-from IPython import get_ipython
-
 # %% [markdown]
 # ## Objective: Put qubit in superposition and measure it.
 # %% [markdown]
@@ -23,13 +20,13 @@ from IPython import get_ipython
 # #### imports
 
 # %%
-from qiskit import QuantumCircuit, assemble, Aer, execute
+from qiskit import QuantumCircuit, assemble, Aer, execute, IBMQ, __qiskit_version__
 from qiskit.visualization import plot_histogram, plot_bloch_multivector
-import qiskit.tools.jupyter
+from qiskit.tools import job_monitor
 from qiskit_textbook.tools import array_to_latex
 from math import sqrt, pi
 
-get_ipython().run_line_magic('qiskit_version_table', '')
+print(__qiskit_version__)    # TODO: finish running the circuit on a quantum computer.
 
 # %% [markdown]
 # #### create qubit
@@ -89,5 +86,25 @@ state = sv_sim.run(qobj).result().get_statevector()
 # Plot the state of the qubit (statevector).
 
 plot_bloch_multivector(state)
+
+# %% [markdown]
+# #### run simulation on an actual IBM quantum computer.
+
+# %%
+# NOTE: If you don't have an IBMQ account follow this video to get started: https://bit.ly/3s6tayr
+
+IBMQ.load_account()
+
+provider = IBMQ.get_provider('ibm-q')
+
+qcomp = provider.get_backend('ibmq_16_melbourne')
+job = execute(qubit, backend=qcomp)
+job_monitor(job)
+
+result = job.result()
+plot_histogram(result.get_counts())
+
+# NOTE: The simulated version has more accurate results
+#       bc the real quantum computer has quantum noise and can result in breaking of superposition.
 
 
