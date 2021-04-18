@@ -21,12 +21,13 @@
 
 # %%
 from qiskit import QuantumCircuit, assemble, Aer, execute, IBMQ, __qiskit_version__
-from qiskit.visualization import plot_histogram, plot_bloch_multivector
+from qiskit.providers.ibmq import least_busy
 from qiskit.tools import job_monitor
 from qiskit_textbook.tools import array_to_latex
+from qiskit.visualization import plot_histogram, plot_bloch_multivector
 from math import sqrt, pi
 
-print(__qiskit_version__)    # TODO: finish running the circuit on a quantum computer.
+print(__qiskit_version__)
 
 # %% [markdown]
 # #### create qubit
@@ -97,8 +98,12 @@ IBMQ.load_account()
 
 provider = IBMQ.get_provider('ibm-q')
 
+# Get least busy computer.
+quantum_computer = least_busy(provider.backends(simulator=False))
+print('Running on ', quantum_computer)
+
 qcomp = provider.get_backend('ibmq_16_melbourne')
-job = execute(qubit, backend=qcomp)
+job = execute(qubit, backend=quantum_computer)
 job_monitor(job)
 
 result = job.result()
