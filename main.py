@@ -41,75 +41,83 @@ qubit.measure(0, 0)
 # Create object.
 qobj = assemble(qubit)
 
-# Show the steps of the circuit.
-qubit.draw(output='mpl')
-
 # %% [markdown]
-# #### check measurement probabilities through sim
+# #### wave function  of qubit:
+# <img src='wave_function.gif'>
+# %% [markdown]
+# #### create helper function to run simulations
 
 # %%
-# NOTE: We need to create a new qubit without measurement (to visualize probabilities).
-qubit_2 = QuantumCircuit(1)
-qubit_2.h(0)
-qobj_2 = assemble(qubit_2)
+class Simulate:
+    def __init__(self, circuit, simulator):
+        self.circuit = circuit
+        self.simulator = simulator
 
-sv_sim = Aer.get_backend('statevector_simulator')
-state = sv_sim.run(qobj_2).result().get_statevector()
+    def execute_circuit_sv(self):
+        sv_sim = Aer.get_backend('statevector_simulator')
 
-# Show result of sim.
-array_to_latex(state, pretext="\\text{Probabilitiy Vector = }")
+        result = execute(self.circuit, sv_sim).result()
 
-# NOTE: We find that there is a 50/50 chance of measuring |0> and |1>.
+        state = result.get_statevector(self.circuit)
+        circuit_diagram = self.circuit.draw('mpl')
+        bloch_sphere = plot_bloch_multivector(state)
 
-# %% [markdown]
-# #### simulate the qubit measurements
+        return circuit_diagram, state, bloch_sphere
+    
+    def execute_circuit_qasm(self):
+        qasm_sim = Aer.get_backend('qasm_simulator')
+
+        result = execute(qubit, qasm_sim, shots=100).result()
+        counts = result.get_counts(self.circuit)
+        circuit_diagram = self.circuit.draw('mpl')
+        histogram = plot_histogram(counts)
+
+        return circuit_diagram, counts, histogram
+    
+    def execute_circuit_qcomp(self):
+        IBMQ.load_account()
+
+        provider = IBMQ.get_provider('ibm-q')
+
+        # Get least busy computer.
+        qcomp = least_busy(provider.backends(simulator=False))
+        print('Running on', qcomp)
+
+        job = execute(qubit, backend=qcomp)
+        job_monitor(job)
+
+        result = job.result()
+        return plot_histogram(result.get_counts())
+    
+    def __call__(self):
+        if self.simulator == 'statevector':
+            return self.execute_circuit_sv()
+        elif self.simulator == 'qasm':
+            return self.execute_circuit_qasm()
+        elif self.simulator == 'qcomp' or self.simulator == 'quantum computer':
+            return self.execute_circuit_qcomp()
+        else:
+            raise NameError(f"Simulator '{simulator}' is not an option.")
+        
+
+circuit_diagram, state, bloch_sphere = Simulate(qubit, 'statevector')()
+circuit_diagram, counts, histogram = Simulate(qubit, 'qasm')()
+
 
 # %%
-simulator = Aer.get_backend('qasm_simulator')
-job = execute(qubit, simulator, shots=1000)    # Simulate qubit measurement 1000 times.
-result = job.result()
+circuit_diagram
 
-# Show results of the simulation.
-counts = result.get_counts(qubit)
-plot_histogram(counts)
-
-# %% [markdown]
-# #### simulate the qubit measurements (on a bloch sphere)
 
 # %%
-# Run simulation.
-state = sv_sim.run(qobj).result().get_statevector()
+histogram
 
-# NOTE: The reason why a new simulator is used is bc this simulator
-#       returns the statevector (final measurement) of the qubit
-#       through get_statevector() while 'qasm_simulator' returns
-#       get_counts(), getting measurements for a specific amounts of shots.
-# Plot the state of the qubit (statevector).
-
-plot_bloch_multivector(state)
-
-# %% [markdown]
-# #### run simulation on an actual IBM quantum computer.
 
 # %%
-# NOTE: If you don't have an IBMQ account follow this video to get started: https://bit.ly/3s6tayr
+bloch_sphere
 
-IBMQ.load_account()
 
-provider = IBMQ.get_provider('ibm-q')
-
-# Get least busy computer.
-quantum_computer = least_busy(provider.backends(simulator=False))
-print('Running on ', quantum_computer)
-
-qcomp = provider.get_backend('ibmq_16_melbourne')
-job = execute(qubit, backend=quantum_computer)
-job_monitor(job)
-
-result = job.result()
-plot_histogram(result.get_counts())
-
-# NOTE: The simulated version has more accurate results
-#       bc the real quantum computer has quantum noise and can result in breaking of superposition.
+# %%
+qcomp_histogram = Simulate(qubit, 'qcomp')()
+qcomp_histogram
 
 
