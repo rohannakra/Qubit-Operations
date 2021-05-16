@@ -97,7 +97,7 @@ class Simulate:
         elif self.simulator == 'qcomp' or self.simulator == 'quantum computer':
             return self.execute_circuit_qcomp()
         else:
-            raise NameError(f"Simulator '{simulator}' is not an option.")
+            raise NameError(f"Simulator '{self.simulator}' is not an option.")
         
 
 circuit_diagram, state, bloch_sphere = Simulate(qubit, 'statevector')()
