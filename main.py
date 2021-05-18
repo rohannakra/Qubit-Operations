@@ -48,6 +48,7 @@ qobj = assemble(qubit)
 # #### create helper function to run simulations
 
 # %%
+# Create Simulate class to use diferent simulators and backends.
 class Simulate:
     def __init__(self, circuit, simulator):
         self.circuit = circuit
@@ -90,7 +91,7 @@ class Simulate:
         return plot_histogram(result.get_counts())
     
     def __call__(self):
-        if self.simulator == 'statevector':
+        if self.simulator == 'statevector' or self.simulator == 'sv':
             return self.execute_circuit_sv()
         elif self.simulator == 'qasm':
             return self.execute_circuit_qasm()
@@ -99,9 +100,16 @@ class Simulate:
         else:
             raise NameError(f"Simulator '{self.simulator}' is not an option.")
         
+    # NOTE: The __call__() special method is when an instance of the Simulate class is called on.
 
+
+# Simulation on statevector_simulator
 circuit_diagram, state, bloch_sphere = Simulate(qubit, 'statevector')()
+
+# Simulation on qasm_simulator
 circuit_diagram, counts, histogram = Simulate(qubit, 'qasm')()
+
+# NOTE: The extra set of parantheses triggers __call__().
 
 
 # %%
